@@ -1,7 +1,7 @@
 import Joi from 'joi'
 import { find } from 'lodash'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
-import  ApiError  from '~/utils/ApiError.js';
+import ApiError from '~/utils/ApiError.js';
 import { BOARD_TYPE } from '~/utils/constants.js';
 import { GET_DB } from '~/config/mongodb'
 import { ObjectId } from 'mongodb'
@@ -10,10 +10,9 @@ const CARD_COLLECTION_NAME = 'cards'
 const CARD_COLLECTION_SCHEMA = Joi.object({
   boardId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
   columnId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
-
   title: Joi.string().required().min(3).max(50).trim().strict(),
   description: Joi.string().optional(),
-  type:Joi.string().valid(BOARD_TYPE.PRIVATE,BOARD_TYPE.PUBLIC).required(),
+  type: Joi.string().valid(BOARD_TYPE.PRIVATE, BOARD_TYPE.PUBLIC),
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false)
@@ -41,7 +40,7 @@ const createNew = async (data) => {
     const result = await GET_DB()
       .collection(CARD_COLLECTION_NAME)
       .insertOne(validData)
-      const dataresult = await GET_DB()
+    const dataresult = await GET_DB()
       .collection(CARD_COLLECTION_NAME)
       .findOne({ _id: result.insertedId })
 
@@ -53,17 +52,40 @@ const createNew = async (data) => {
     throw error
   }
 }
-const findOne = async (id) => { 
+const findOne = async (id) => {
   try {
     const dataresult = await GET_DB()
       .collection(CARD_COLLECTION_NAME)
-      .findOne({ _id: id })
+      .findOne({ _id: new ObjectId(id) })
     return dataresult
   } catch (error) {
     console.error("❌ CardModel.findOne error:", error)
     throw error
   }
 }
+const deleteCard = async (cardId) => {
+    try {
+       const result = await GET_DB()
+            .collection(CARD_COLLECTION_NAME)
+            .deleteOne({ _id: new ObjectId(cardId) });
+        return result;
+    } catch (error) {
+        console.error("❌ CardModel.deleteCard error:", error);
+        throw error;
+    }
+}
+ const pullAllCardsFromColumn = async (column) => {
+    try {
+        const result = await GET_DB()
+            .collection(CARD_COLLECTION_NAME)
+            .deleteMany({ columnId: new ObjectId(column._id) });
+        return result;
+    } catch (error) {
+        console.error("❌ CardModel.pullAllCardsFromColumn error:", error);
+        throw error;
+    }
+}
+
 
 
 
@@ -71,5 +93,7 @@ export const CardModel = {
   CARD_COLLECTION_NAME,
   CARD_COLLECTION_SCHEMA,
   createNew,
-  findOne
+  findOne,
+  deleteCard,
+  pullAllCardsFromColumn
 }

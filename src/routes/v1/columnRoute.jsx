@@ -12,6 +12,8 @@ Router.route('/:id').get( (req, res) => {
     columnController.getColumnById(req, res);
 }).put( (req, res) => {
     columnController.updateColumn(req, res);
+}).delete((req, res)=>{
+        columnController.deleteColumn(req, res);
 })
 
 export const columnRoute = Router

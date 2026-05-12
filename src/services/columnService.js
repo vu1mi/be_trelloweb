@@ -4,6 +4,7 @@ import ApiError from '~/utils/ApiError';
 import { StatusCodes } from 'http-status-codes';
 import { cloneDeep, get } from 'lodash';
 import { BoardModel } from '~/models/boardModel.js';
+import { CardModel } from '~/models/cardModel';
 
 const  createNew = async (data)=>{
     try{
@@ -28,8 +29,22 @@ const  createNew = async (data)=>{
           throw customError
     }
 }
+const deleteColumn = async (columnId) => {
+    try {
+        const column = await ColumnModel.findOne(columnId); 
+        if (!column) {
+            throw new ApiError(StatusCodes.NOT_FOUND , 'Column not found');
+        }   
+        const deletedColumn = await ColumnModel.deleteColumn(columnId);
+        await BoardModel.pullColumnFromBoard(column);
+        await CardModel.pullAllCardsFromColumn(column);
+        return deletedColumn;
+    }catch (error) {
+            throw error
+        }
+}
 
 export const columnService ={
     createNew,
-
+    deleteColumn
 }

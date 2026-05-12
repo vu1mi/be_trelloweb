@@ -14,6 +14,15 @@ const createNew = async (req, res,next)=>{
        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ errors: new Error(error).message });
         }
 }
+const deleteColumn = async (req, res, next) => {
+    try {
+        const columnId = req.params.id;
+        const deletedColumn = await columnService.deleteColumn(columnId);
+        res.status(StatusCodes.NO_CONTENT).json(deletedColumn);
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ errors: new Error(error).message });
+    }
+};
 
 // const getBoardById = async (req, res, next) => {
 //     try {
@@ -37,5 +46,6 @@ const createNew = async (req, res,next)=>{
 // };
 
 export const columnController = {
-  createNew
+  createNew,
+  deleteColumn
 };

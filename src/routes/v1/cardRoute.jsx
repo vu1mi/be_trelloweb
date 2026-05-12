@@ -12,6 +12,8 @@ Router.route('/:id').get( (req, res) => {
     cardController.getCardById(req, res);
 }).put( (req, res) => {
     cardController.updateCard(req, res);
+}).delete((req, res)=>{
+        cardController.deleteCard(req, res);
 })
 
-export const cardRoute = Router
+export const cardRoute = Router;

@@ -4,6 +4,7 @@ import ApiError from '~/utils/ApiError';
 import { StatusCodes } from 'http-status-codes';
 import { cloneDeep, get } from 'lodash';
 import { ColumnModel } from '~/models/columnModel';
+// import {deleteCard} from '~/models/cardModel.js';
 
 const  createNew = async (data)=>{
     try{
@@ -22,6 +23,20 @@ const  createNew = async (data)=>{
     }catch(error){
           throw error
     }
+}
+
+const deleteCard = async (cardId) => {
+    try {
+        const card = await CardModel.findOne(cardId);
+        if (!card) {
+            throw new ApiError(StatusCodes.NOT_FOUND , 'Card not found');
+        }
+        const deletedCard = await CardModel.deleteCard(cardId);
+        await ColumnModel.pullCardFromColumn(card);
+        return deletedCard;
+    }catch (error) { 
+            throw error
+        }
 }
 
 // const getBoardById = async (boardId) => {
@@ -54,5 +69,6 @@ const  createNew = async (data)=>{
 
 export const cardService ={
     createNew,
+    deleteCard
  
 }

@@ -63,7 +63,7 @@ const findOne = async (id) => {
    
       const dataresult = await GET_DB()
       .collection(COLUMN_COLLECTION_NAME)
-      .findOne({ _id: id })
+      .findOne({ _id: new ObjectId(id) })
       return dataresult
   } catch (error) {
     console.error("❌ ColumnModel.findOne error:", error)
@@ -90,12 +90,37 @@ const pushCardToColumn = async (card) => {
 
   }
 }
-
+const pullCardFromColumn = async (card) => {
+    try {
+       const result = await GET_DB()
+            .collection(COLUMN_COLLECTION_NAME)
+            .findOneAndUpdate({ _id: new ObjectId(card.columnId) },
+             { $pull: { cardOrderIds: new ObjectId(card._id) } },
+             { returnDocument: 'after', includeResultMetadata: false });
+       return result?.value ?? result ?? null
+    } catch (error) {
+        console.error("❌ ColumnModel.pullCardFromColumn error:", error);
+        throw error;
+    }
+}
+const deleteColumn = async (columnId) => {
+    try {
+       const result = await GET_DB()
+            .collection(COLUMN_COLLECTION_NAME)
+            .deleteOne({ _id: new ObjectId(columnId) });
+       return result;
+    } catch (error) {
+        console.error("❌ ColumnModel.deleteColumn error:", error);
+        throw error;
+    }   
+}
 
 export const ColumnModel = {
   COLUMN_COLLECTION_NAME,
   COLUMN_COLLECTION_SCHEMA,
   createNew,
   findOne,
-  pushCardToColumn
+  pushCardToColumn,
+  pullCardFromColumn,
+  deleteColumn
 }
