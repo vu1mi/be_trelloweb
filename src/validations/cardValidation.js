@@ -24,7 +24,43 @@ const createNew = async (req, res, next) => {
     next(customError);
   }
 }
+const deleteCard = async (req, res, next) => {
+  const correctBoard = Joi.object({
+    id: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+  });
+  try {
+    console.log("req.params:", req.params);
+    await correctBoard.validateAsync(req.params, { abortEarly: false });
+    next()
+  } catch (error) {
+    const newMessage = new Error(error).message;
+    const customError = new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, newMessage);
+    next(customError);
+  }
+}
+const updateCard = async (req, res, next) => {
+  const correctBoard = Joi.object({ 
+    id: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+    title: Joi.string().min(3).max(30).trim().strict(),
+    description: Joi.string().max(300).trim().strict(),
+    type: Joi.string().valid(BOARD_TYPE.PRIVATE, BOARD_TYPE.PUBLIC),
+  });
+  try {
+    console.log("req.params:", req.params);
+    console.log("req.body:", req.body);
+    await correctBoard.validateAsync({ ...req.params, ...req.body }, { abortEarly: false });
+    next()
+  }
+    catch (error) {
+    const newMessage = new Error(error).message;
+    const customError = new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, newMessage);
+    next(customError);
+  }
+}
+
 
 export const cardValidation = {
-  createNew
+  createNew,
+  deleteCard,
+  updateCard
 };

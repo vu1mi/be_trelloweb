@@ -10,9 +10,9 @@ Router.route('/').get( (req, res) => {
 
 Router.route('/:id').get( (req, res) => {
     cardController.getCardById(req, res);
-}).put( (req, res) => {
+}).patch( cardValidation.updateCard, (req, res) => {
     cardController.updateCard(req, res);
-}).delete((req, res)=>{
+}).delete(cardValidation.deleteCard, (req, res)=>{
         cardController.deleteCard(req, res);
 })
 

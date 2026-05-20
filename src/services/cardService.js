@@ -66,9 +66,22 @@ const deleteCard = async (cardId) => {
 //         throw error;
 //     }
 // };
-
+const updateCard = async (cardId, updateData) => {
+    try {
+        const card = await CardModel.findOne(cardId);
+        if (!card) {
+            throw new ApiError(StatusCodes.NOT_FOUND , 'Card not found');
+        }
+        await CardModel.updateCard(cardId, updateData);
+        const updatedCard = await CardModel.findOne(cardId);
+        return updatedCard;
+    }
+        catch (error) {
+            throw error;
+        }
+}   
 export const cardService ={
     createNew,
-    deleteCard
- 
+    deleteCard,
+    updateCard
 }

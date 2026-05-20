@@ -17,6 +17,7 @@ const CARD_COLLECTION_SCHEMA = Joi.object({
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false)
 })
+
 const validateData = async (data) => {
   try {
     const validData = await CARD_COLLECTION_SCHEMA.validateAsync(data, {
@@ -85,9 +86,20 @@ const deleteCard = async (cardId) => {
         throw error;
     }
 }
-
-
-
+ const updateCard = async (cardId, updateData) => {
+  //  const validData = await validateData(updateData)
+    try {
+        const result = await GET_DB().collection(CARD_COLLECTION_NAME).findOneAndUpdate(
+            { _id: new ObjectId(cardId) },
+            { $set: updateData },
+            { returnDocument: 'after' }
+        );
+        return result;
+    } catch (error) {
+        console.error("❌ CardModel.updateCard error:", error);
+        throw error;
+    }
+}
 
 export const CardModel = {
   CARD_COLLECTION_NAME,
@@ -95,5 +107,6 @@ export const CardModel = {
   createNew,
   findOne,
   deleteCard,
+  updateCard,
   pullAllCardsFromColumn
 }
