@@ -1,3 +1,5 @@
+import pick from 'lodash/pick.js'
+
 export const slugify = (val) => {
   if (!val) return ''
   return String(val)
@@ -16,5 +18,7 @@ export const slugify = (val) => {
 const originalStringTest = 'thanh vu'
 const slug = slugify(originalStringTest)
 
-console.log('originalStringTest:', originalStringTest)
-console.log('slug:', slug)
+export const pickUser = (user) => {
+  if (!user) return null
+  return pick(user, ['_id', 'email', 'username', 'displayName', 'avatar', 'role', 'isActive' ,'createdAt', 'updatedAt'])
+}

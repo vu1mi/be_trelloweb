@@ -26,6 +26,6 @@ export const corsOptions = {
   // Some legacy browsers (IE11, various SmartTVs) choke on 204
   optionsSuccessStatus: 200,
 
- 
+ //cho phep nhan cookie tu request tu client, khi client gui request den server thi cookie se duoc gui kem theo neu co va server se nhan duoc cookie do va xu ly nhu binh thuong, tuy nhien neu client va server khac domain thi phai cau hinh them cho phep gui cookie cross-origin nhu sau:
   credentials: true
 }
