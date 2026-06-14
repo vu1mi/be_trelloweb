@@ -6,6 +6,7 @@ import {API_V1_ROUTES} from '~/routes/v1/index.js'
 import {handlerError} from '~/middlewares/handlerErrorMiddleware.js'
 import  cors from 'cors'
 import { corsOptions } from '~/config/cors.js'
+import  cookieParser from 'cookie-parser'
 
 
 const START_SERVER = async () => {
@@ -15,9 +16,15 @@ const START_SERVER = async () => {
   app.get('/', (req, res) => {
     res.send('Welcome to Trello API 🚀')
   })
+  app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+  });
+
+  app.use(cookieParser())
   app.use('/v1', API_V1_ROUTES)
 
-
+ 
 
   console.log(await GET_DB().listCollections().toArray())
 
