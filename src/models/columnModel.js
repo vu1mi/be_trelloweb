@@ -19,6 +19,12 @@ const COLUMN_COLLECTION_SCHEMA = Joi.object({
   _destroy: Joi.boolean().default(false)
 })
 
+const COLUMN_COLLECTION_UPDATE_SCHEMA = Joi.object({
+  title: Joi.string().min(3).max(50).trim().strict(),
+  description: Joi.string().max(300).trim().strict(),
+  updatedAt: Joi.date().timestamp('javascript').default(Date.now),
+})
+
 const validateData = async (data) => {
   try {
     const validData = await COLUMN_COLLECTION_SCHEMA.validateAsync(data, {
@@ -27,6 +33,18 @@ const validateData = async (data) => {
     return validData
   } catch (error) {
     console.error("❌ ColumnModel.validateData error:", error)
+    throw error
+  }
+}
+
+const validateUpdateData = async (data) => {
+  try {
+    const validData = await COLUMN_COLLECTION_UPDATE_SCHEMA.validateAsync(data, {
+      abortEarly: false
+    })
+    return validData
+  } catch (error) {
+    console.error("❌ ColumnModel.validateUpdateData error:", error)
     throw error
   }
 }
@@ -115,6 +133,24 @@ const deleteColumn = async (columnId) => {
     }   
 }
 
+const update = async (columnId, updateData, userId) => {
+    try {
+      const validData = await validateUpdateData(updateData)
+        const result = await GET_DB()
+            .collection(COLUMN_COLLECTION_NAME)
+            .findOneAndUpdate(
+                { _id: new ObjectId(columnId) },
+                { $set: { ...validData, updatedAt: Date.now() } },
+                { returnDocument: 'after', includeResultMetadata: false }
+            );
+        return result?.value ?? result ?? null;
+    }
+    catch (error) {
+        console.error("❌ ColumnModel.update error:", error);
+        throw error;
+    }
+  }
+
 export const ColumnModel = {
   COLUMN_COLLECTION_NAME,
   COLUMN_COLLECTION_SCHEMA,
@@ -122,5 +158,6 @@ export const ColumnModel = {
   findOne,
   pushCardToColumn,
   pullCardFromColumn,
-  deleteColumn
+  deleteColumn,
+  update
 }

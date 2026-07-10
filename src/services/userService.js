@@ -7,6 +7,7 @@ import {pickUser} from '~/utils/formatter.js';
 import {env} from '~/config/environment.js';
 import {BrevoProvider} from '~/providers/BrevoProvider.js';
 import {jwtProvider} from '~/providers/JwtProvider.js';
+import {CloudinaryProvider} from '~/providers/CloudinaryProvider.js';
 const createNew = async (userData) => {
     //kiem tra xem email da ton tai tren he thong hay chua
     try{
@@ -128,10 +129,59 @@ const refreshToken = async (refreshToken) => {
         throw error;
     }
 }
+const updateProfile = async ( userId, updateData, avatarFile) => {
+    
+    try {
+        console.log("Updating profile for userId:", userId, "with data:", updateData);
+      
+        const user = await userModel.findOneById(userId);
+        if (!user) {
+            throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
+        }
+        let updateUser ={};
+        if(updateData.password || updateData.newPassword){
+               if (!updateData.password || !updateData.newPassword) {
+                        throw new ApiError(StatusCodes.BAD_REQUEST, "Missing password fields");
+                    }
+             
+                if(!bcrypt.compareSync(updateData.password, user.password)){
+                    throw new ApiError(StatusCodes.BAD_REQUEST, "Current password is incorrect");
+                }
+            
+            updateUser = await userModel.update(userId, { password: await bcrypt.hashSync(updateData.newPassword, 12) });
+        }else if(avatarFile){
+            // Handle avatar file upload logic here
+            const avatarPath = await CloudinaryProvider.uploadStream(avatarFile.buffer, 'userAvatar');
+            console.log('Avatar uploaded to Cloudinary:', avatarPath);
+            updateUser = await userModel.update(userId, { avatar: avatarPath.url });
+        }
+        else{
+            updateUser = await userModel.update(userId, updateData);
+        }
+        return pickUser(updateUser); 
+    } catch (error) {
+        console.error("❌ userService.updateProfile error:", error);
+        throw error;
+    }
+}
+const getProfile = async (userId) => {
+    try {
+        const user = await userModel.findOneById(userId);
+        if (!user) {
+            throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
+        }
+        return pickUser(user);
+    } catch (error) {
+        console.error("❌ userService.getProfile error:", error);
+        throw error;
+    }
+}
 
 export const userService = {
     createNew,
     login,
     verifyEmail,
-    refreshToken
+    refreshToken,
+    updateProfile,
+    getProfile
 }

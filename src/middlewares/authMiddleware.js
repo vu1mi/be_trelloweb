@@ -7,12 +7,19 @@ import {jwtProvider} from '~/providers/JwtProvider.js'
 const isAuth = async (req, res, next) => {
 
     const clientToken = req.cookies.accessToken 
+    const refreshToken = req.cookies.refreshToken
     try {
-      const accessTokenDecode = await jwtProvider.verifyToken(clientToken , env.ACCESS_TOKEN_SECRET);
-      if (!accessTokenDecode) {
+      // const accessTokenDecode = await jwtProvider.verifyToken(clientToken , env.ACCESS_TOKEN_SECRET);
+      if (!clientToken && !refreshToken) {
         throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid token");
       }
-      req.jwtDecode = accessTokenDecode;
+
+      const refreshTokenDecode = await jwtProvider.verifyToken(refreshToken , env.REFRESH_TOKEN_SECRET);
+      req.jwtDecode = refreshTokenDecode;
+      console.log('Decoded token:', refreshTokenDecode);
+        if (!clientToken && refreshToken) {
+         next(new ApiError(StatusCodes.GONE, "Token expired"));
+      }
 
         next();
     } catch (error) {

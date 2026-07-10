@@ -1,6 +1,8 @@
 import express  from "express";
 import {userValidation} from '~/validations/userValidation.js';
 import {userController} from '~/controllers/userController';
+import {authMiddleware} from '~/middlewares/authMiddleware.js';
+import {multeruploadMiddleware} from '~/middlewares/multerUploadMiddleware.js';
 
 const Router = express.Router();
 
@@ -16,5 +18,9 @@ const Router = express.Router();
         .delete(userController.logout);
     Router.route('/refresh_token')
         .get(userController.refreshToken);
+    
+    Router.route('/profile')
+        .get(userController.getProfile)
+        .patch(authMiddleware.isAuth, multeruploadMiddleware.upload.single('avatar'), userValidation.updateProfile, userController.updateProfile);
 
 export const userRoute = Router;

@@ -34,18 +34,20 @@ const deleteColumn = async (req, res, next) => {
 //     }
 // };
 
-// const updateBoard = async (req, res, next) => {
-//     try {
-//         const boardId = req.params.id;
-//         const updateData = req.body;
-//         const updatedBoard = await boardService.updateBoard(boardId, updateData);
-//         res.status(StatusCodes.OK).json(updatedBoard);
-//     } catch (error) {
-//         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ errors: new Error(error).message });
-//     }
-// };
+const updateColumn = async (req, res, next) => {
+    try {
+        const columnId = req.params.id;
+        const updateData = req.body;
+        const userId = req.jwtDecode._id; // Assuming you have user authentication and the user ID is available in req.user
+        const updatedColumn = await columnService.updateColumn(columnId, updateData, userId);
+        res.status(StatusCodes.OK).json(updatedColumn);
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ errors: new Error(error).message });
+    }
+};
 
 export const columnController = {
   createNew,
-  deleteColumn
+  deleteColumn,
+  updateColumn
 };

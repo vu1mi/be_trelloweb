@@ -58,10 +58,28 @@ const verifyEmail = async (req, res,next)=>{
       next(customError);
       }
 }
+const updateProfile = async (req, res,next)=>{
+  const correctCondition = Joi.object({
+    password: Joi.string().pattern(ROLE_REGEX_PASSWORD).message(ROLE_ERRORS_PASSWORD),
+    newPassword: Joi.string().pattern(ROLE_REGEX_PASSWORD).message(ROLE_ERRORS_PASSWORD),
+    username: Joi.string().min(3).max(50).pattern(ROLE_REGEX_FULLNAME).message(ROLE_ERRORS_FULLNAME),
+    email: Joi.string().min(3).max(30).pattern(ROLE_REGEX_EMAIL).message(ROLE_ERRORS_EMAIL),
+    avatar: Joi.string().uri(),
+  });
+  try {
+      await correctCondition.validateAsync(req.body , { abortEarly: false }  );
+      next()
+    }
+    catch (error) {    const newMessage = new  Error(error).message;
+      const customError = new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, newMessage);
+      next(customError);
+      }
+    }
 
 
 export const userValidation = {
   createNew,
   login,
+  updateProfile,
   verifyEmail
 };

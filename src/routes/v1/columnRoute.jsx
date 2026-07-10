@@ -15,7 +15,7 @@ Router.route('/:id')
     .get( authMiddleware.isAuth, (req, res) => {
         columnController.getColumnById(req, res);
     })
-    // .put( authMiddleware.isAuth,  columnController.updateColumn )
+    .patch( authMiddleware.isAuth, columnValidation.update, columnController.updateColumn )
     .delete( authMiddleware.isAuth,  columnController.deleteColumn );
 
 export const columnRoute = Router;              

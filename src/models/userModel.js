@@ -60,6 +60,15 @@ const findOneByEmail = async (emailValue) => {
         throw error;
     }
 };
+const findOneById = async (idValue) => {
+    try {
+        const user = await GET_DB().collection(USER_COLLECTION_NAME).findOne({ _id: new ObjectId(idValue) });
+        return user;
+    } catch (error) {
+        console.error("❌ UserModel.findOneById error:", error);
+        throw error;
+    }
+}
 
 const update = async (userId, updateData) => {
     try {
@@ -79,9 +88,30 @@ const update = async (userId, updateData) => {
         throw error;
     }
 };
+const updateProfile = async (userId, updateData) => {
+    try {
+        const updateFields = Object.keys(updateData);
+        const invalidFields = updateFields.filter(field => INVALID_UPDATE_FIELDS.includes(field));
+        if (invalidFields.length > 0) {
+            throw new ApiError(StatusCodes.BAD_REQUEST, `Invalid update fields: ${invalidFields.join(', ')}`);
+        }
+        const result = await GET_DB().collection(USER_COLLECTION_NAME).findOneAndUpdate(
+            { _id: new ObjectId(userId) },
+            { $set: updateData },
+            { returnDocument: 'after' }
+        );
+        return result;
+    } catch (error) {
+        console.error("❌ UserModel.updateProfile error:", error);
+        throw error;
+    }
+};
 
 export const userModel = {
     createNew,
     findOneByEmail,
-    update
+    update,
+    updateProfile,
+    findOneById,
+
 }

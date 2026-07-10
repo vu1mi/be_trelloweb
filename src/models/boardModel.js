@@ -34,15 +34,21 @@ const validateData = async (data) => {
   }
 }
 
-const createNew = async (data) => {
+const createNew = async ( userid , data) => {
   try {
+    console.log("Validating data for new board:", data, "for userId:", userid)
     const validData = await validateData(data)
 
     console.log("✅ Valid data:", validData)
 
+    const databoard = {
+      ...validData,
+      adminIds: [new ObjectId(userid)],
+    }
+
     const result = await GET_DB()
       .collection(BOARD_COLLECTION_NAME)
-      .insertOne(validData)
+      .insertOne(databoard)
       const dataresult = await GET_DB()
       .collection(BOARD_COLLECTION_NAME)
       .findOne({ _id: result.insertedId })
@@ -141,6 +147,39 @@ const pullColumnFromBoard = async (column) => {
         throw error;  
     }
 }
+const getAllBoards = async (userId , page , pageSize) => {
+
+  const condition = [
+      { _destroy: false }, 
+      { $or: [
+        { memberIds: new ObjectId(userId) },
+        { adminIds: new ObjectId(userId) }
+      ]}
+    ]
+    try {
+        const skip = (page - 1) * pageSize;
+        const boards = await GET_DB()
+            .collection(BOARD_COLLECTION_NAME)
+            .aggregate([
+                { $match: { $and: condition} },
+                { $sort: { title: 1 } },
+                { $facet: {
+                    'data': [{ $skip: skip }, { $limit: pageSize }],
+                    'totalCount': [{ $count: 'count' }]
+
+                }}
+
+            ],
+            {collation: { locale: 'en' }}
+          ).toArray();
+
+          console.log(boards[0])
+        return boards[0]|| [];
+    } catch (error) {
+        console.error("❌ BoardModel.getAllBoards error:", error);
+        throw error;
+    }
+}
 
 export const BoardModel = {
   COLUMN_COLLECTION_NAME,
@@ -150,5 +189,6 @@ export const BoardModel = {
   findOne,
   getDetail,
   pushColumnToBoard,
-  pullColumnFromBoard
+  pullColumnFromBoard,
+  getAllBoards
 }

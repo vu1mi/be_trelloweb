@@ -23,7 +23,23 @@ const createNew = async (req, res,next)=>{
       next(customError);
         }
 }
+const update = async (req, res,next)=>{
+  const correctBoard = Joi.object({
+    title: Joi.string().min(3).max(30).required().trim().strict(),
+  });
+  try {
+     console.log("req.body:", req.body);
+     console.log("correctBoard:", req.body);
+     await correctBoard.validateAsync(req.body , { abortEarly: false }  );
+     next()
+  } catch (error) {
+   const newMessage = new  Error(error).message;
+   const customError = new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, newMessage);
+   next(customError);
+     }
+    }
 
 export const columnValidation = {
-  createNew
+  createNew,
+  update
 };

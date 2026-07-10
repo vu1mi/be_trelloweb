@@ -5,8 +5,9 @@ import {boardService} from '~/services/boardService.js';
 const createNew = async (req, res,next)=>{
     
      try {
-        console.log("req.body:", req.body);
-        const result = await boardService.createNew(req.body);
+     
+        const userId = req.jwtDecode._id; // Assuming the user ID is available in req.jwtDecode
+        const result = await boardService.createNew(req.body , userId);
          res.status(StatusCodes.CREATED).json(result)
          return result
       
@@ -36,8 +37,23 @@ const updateBoard = async (req, res, next) => {
     }
 };
 
+const getAllBoards = async (req, res, next) => {
+    try {
+        const userId = req.jwtDecode._id; // Assuming the user ID is available in req.jwtDecode
+        const {page , pageSize} = req.query;
+        console.log("Fetching all boards for userId:", userId);
+        const boards = await boardService.getAllBoards(userId , page , pageSize);
+        res.status(StatusCodes.OK).json(boards);
+    } catch (error) {
+        console.error("Error fetching boards:", error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ errors: new Error(error).message });
+    }
+     
+};
+
 export const boardController = {
   createNew,
   getBoardById,
-  updateBoard
+  updateBoard,
+    getAllBoards
 };

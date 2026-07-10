@@ -19,7 +19,7 @@ const login = async (req, res, next) => {
         res.cookie('accessToken', result.accessToken, { httpOnly: true,
                                                         secure: true,
                                                         sameSite: 'none',
-                                                        maxAge: ms('15 minutes') });
+                                                        maxAge: 15 * 1000});
         res.cookie('refreshToken', result.refreshToken, { httpOnly: true, 
                                                         secure: true, 
                                                         sameSite: 'none',
@@ -58,16 +58,36 @@ const refreshToken = async (req, res, next) => {
                 sameSite: 'none', 
                 maxAge: ms('14 days') 
             });
-        // res.cookie('refreshToken', 
-        //     result.refreshToken, 
-        //     {   httpOnly: true, 
-        //         secure: true, 
-        //         sameSite: 'none', 
-        //         maxAge: ms('14 days') 
-        //     });
+   
         res.status(StatusCodes.OK).json({ message: 'Token refreshed successfully' });
     } catch (error) {
         next(new ApiError(StatusCodes.UNAUTHORIZED, "Please login again!"));
+    }
+}
+const updateProfile = async (req, res, next) => {
+    try {
+        const userId = req.jwtDecode?._id;
+        if (!userId) {
+            throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized");
+        }
+        const avatarFile = req.file; // Access the uploaded file from multer
+        console.log('Received avatar file:', avatarFile);
+        const result = await userService.updateProfile(userId, req.body, avatarFile);
+        res.status(StatusCodes.OK).json({ message: 'Profile updated successfully', user: result });
+    } catch (error) {
+        next(error);
+    }
+}
+const getProfile = async (req, res, next) => {
+    try {
+        const userId = req.jwtDecode?._id;
+        if (!userId) {
+            throw new ApiError(StatusCodes.UNAUTHORIZED, "Unauthorized");
+        }
+        const result = await userService.getProfile(userId);
+        res.status(StatusCodes.OK).json({ message: 'Profile retrieved successfully', user: result });
+    } catch (error) {
+        next(error);
     }
 }
 
@@ -75,6 +95,8 @@ export const userController = {
     createNew,
     login,
     verifyEmail,
+    updateProfile,
+    getProfile,
     logout,
     refreshToken
 }

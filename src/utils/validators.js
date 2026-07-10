@@ -7,6 +7,14 @@ const ROLE_REGEX_PASSWORD = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
 const ROLE_ERRORS_PASSWORD = "Password must contain at least one letter and one number and be at least 8 characters long";
 const ROLE_REGEX_FULLNAME = /^[a-zA-Z\s]+$/;
 const ROLE_ERRORS_FULLNAME = "Full name must contain only letters and spaces";
+const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+
+const ALLOWED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/jpg",
+  "image/webp"
+];
 export {
     OBJECT_ID_RULE,
     OBJECT_ID_RULE_MESSAGE,
@@ -16,5 +24,8 @@ export {
     ROLE_REGEX_PASSWORD,
     ROLE_ERRORS_PASSWORD,
     ROLE_REGEX_FULLNAME,
-    ROLE_ERRORS_FULLNAME
+    ROLE_ERRORS_FULLNAME,
+    ALLOWED_TYPES,
+    MAX_SIZE
+
 }

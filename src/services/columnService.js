@@ -44,7 +44,18 @@ const deleteColumn = async (columnId) => {
         }
 }
 
+const updateColumn = async (columnId, updateData, userId) => {
+    try {
+        const column = await ColumnModel.update(columnId, updateData, userId);
+        return column;
+    }catch (error) {
+        throw error
+    }
+}
+
+
 export const columnService ={
     createNew,
-    deleteColumn
+    deleteColumn,
+    updateColumn
 }
