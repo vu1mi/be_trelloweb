@@ -2,9 +2,9 @@ import {slugify} from '~/utils/formatter.js'
 import { CardModel } from '~/models/cardModel'
 import ApiError from '~/utils/ApiError';
 import { StatusCodes } from 'http-status-codes';
-import { cloneDeep, get } from 'lodash';
 import { ColumnModel } from '~/models/columnModel';
-// import {deleteCard} from '~/models/cardModel.js';
+import {userModel} from '~/models/userModel.js';
+import {CloudinaryProvider} from '~/providers/CloudinaryProvider.js';
 
 const  createNew = async (data)=>{
     try{
@@ -15,10 +15,8 @@ const  createNew = async (data)=>{
         const getCard = await CardModel.findOne(createCard._id);
         
                 if(getCard){
-        
                     await ColumnModel.pushCardToColumn(getCard);
                 }
-
         return getCard
     }catch(error){
           throw error
@@ -39,38 +37,29 @@ const deleteCard = async (cardId) => {
         }
 }
 
-// const getBoardById = async (boardId) => {
-//     try {
-//         const board = await BoardModel.getDetail(boardId);
-//         if (!board) {
-//             throw new ApiError(StatusCodes.NOT_FOUND , 'Board not found');
-//         }
+const getCardById = async(cardId)=>{
+    try{
+        const card = await CardModel.findOne(cardId);
+         if (!card) {
+            throw new ApiError(StatusCodes.NOT_FOUND , 'Card not found');
+        }
+        return card
+    }catch(error){
+        throw error
+    }
 
-//         const boardClone = cloneDeep(board);
-//         boardClone.columns.array.forEach(element => {
-//             element.cards = boardClone.cards.filter(card => String(card.columnId) === String(element._id)); 
-//         });
-//         delete boardClone.cards;
-//         return boardClone;
-//     } catch (error) {
-//         throw error;
-//     }
-// };
+}
 
-// const updateBoard = async (boardId, updateData) => {
-//     try {
-//         await BoardModel.update(boardId, updateData);
-//         const updatedBoard = await BoardModel.findOne(boardId);
-//         return updatedBoard;
-//     } catch (error) {
-//         throw error;
-//     }
-// };
-const updateCard = async (cardId, updateData) => {
+const updateCard = async (cardId, updateData , cardCover) => {
     try {
         const card = await CardModel.findOne(cardId);
         if (!card) {
             throw new ApiError(StatusCodes.NOT_FOUND , 'Card not found');
+        }
+        if(cardCover){
+            const cardCoverPath = await CloudinaryProvider.uploadStream(cardCover.buffer, 'cardCover');
+                  
+                         updateData.cover = cardCoverPath.url
         }
         await CardModel.updateCard(cardId, updateData);
         const updatedCard = await CardModel.findOne(cardId);
@@ -83,5 +72,6 @@ const updateCard = async (cardId, updateData) => {
 export const cardService ={
     createNew,
     deleteCard,
-    updateCard
+    updateCard,
+    getCardById
 }

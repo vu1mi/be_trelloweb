@@ -10,7 +10,7 @@ Router.route('/')
     .post(authMiddleware.isAuth, boardValidation.createNew, boardController.createNew );
 
 Router.route('/:id')
-    .get( authMiddleware.isAuth, boardController.getBoardById )
+    .get( boardController.getBoardById )
     // .put( authMiddleware.isAuth, boardValidation.update, boardController.updateBoard );
 
 

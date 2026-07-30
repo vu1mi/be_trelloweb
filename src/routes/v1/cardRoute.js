@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import { cardValidation } from '~/validations/cardValidation.js';
 import { cardController } from '~/controllers/cardController.js';
 import {authMiddleware} from '~/middlewares/authMiddleware.js';
+import {multeruploadMiddleware} from '~/middlewares/multerUploadMiddleware.js';
 const Router = express.Router();
 
 Router.route('/')
@@ -12,8 +13,8 @@ Router.route('/')
     .post( authMiddleware.isAuth, cardValidation.createNew, cardController.createNew );
 
 Router.route('/:id')
-    // .get( authMiddleware.isAuth,cardController.getCardById )
-    .patch( authMiddleware.isAuth, cardValidation.updateCard, cardController.updateCard)
+    .get( authMiddleware.isAuth,cardController.getCardById )
+    .patch( authMiddleware.isAuth, multeruploadMiddleware.upload.single('cover'), cardValidation.updateCard, cardController.updateCard)
     .delete(authMiddleware.isAuth, cardValidation.deleteCard, cardController.deleteCard)
 
 export const cardRoute = Router;

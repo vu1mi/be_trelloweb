@@ -24,17 +24,21 @@ const  createNew = async (data , userid)=>{
 const getBoardById = async (boardId) => {
     try {
         const board = await BoardModel.getDetail(boardId);
-        console.log("Board details:", board);
         if (!board) {
             throw new ApiError(StatusCodes.NOT_FOUND , 'Board not found');
         }
 
         const boardClone = cloneDeep(board);
-        console.log("Board with columns and cards:", boardClone);
+      
         boardClone.columns.forEach(element => {
             element.cards = boardClone.cards.filter(card => String(card.columnId) === String(element._id)); 
         });
+        boardClone.Fe_allCard = boardClone.admins.concat(boardClone.members)
+
+        delete boardClone.admins
+        delete boardClone.members
         delete boardClone.cards;
+
         
         return boardClone;
     } catch (error) {
