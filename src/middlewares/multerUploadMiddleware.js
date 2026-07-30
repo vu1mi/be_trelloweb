@@ -1,7 +1,6 @@
 import multer from 'multer';
 import {MAX_SIZE, ALLOWED_TYPES} from '~/utils/validators.js';
 
-
 const customfilefilter = (req, file, cb) => {
     if (ALLOWED_TYPES.includes(file.mimetype)) {
         cb(null, true);

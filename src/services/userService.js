@@ -143,11 +143,9 @@ const updateProfile = async ( userId, updateData, avatarFile) => {
                if (!updateData.password || !updateData.newPassword) {
                         throw new ApiError(StatusCodes.BAD_REQUEST, "Missing password fields");
                     }
-             
                 if(!bcrypt.compareSync(updateData.password, user.password)){
                     throw new ApiError(StatusCodes.BAD_REQUEST, "Current password is incorrect");
                 }
-            
             updateUser = await userModel.update(userId, { password: await bcrypt.hashSync(updateData.newPassword, 12) });
         }else if(avatarFile){
             // Handle avatar file upload logic here

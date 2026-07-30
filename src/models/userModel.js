@@ -1,5 +1,4 @@
-
- import Joi from 'joi';
+import Joi from 'joi';
  import { StatusCodes } from 'http-status-codes';
  import  ApiError  from '~/utils/ApiError.js';
  import {ObjectId} from 'mongodb';
@@ -19,11 +18,10 @@ import {   ROLE_MESSAGES,
     ADMIN: 'admin'
  }
 
- const USER_COLLECTION_NAME = 'users';
+ export  const USER_COLLECTION_NAME = 'users';
  const USER_COLLECTION_SCHEMA = Joi.object({
     email: Joi.string().required().pattern(ROLE_REGEX_EMAIL).message(ROLE_ERRORS_EMAIL),
     password: Joi.string().required(),
-    // password: Joi.string().min(8).required().pattern(ROLE_REGEX_PASSWORD).message(ROLE_ERRORS_PASSWORD),
     username: Joi.string().min(3).max(50).required().pattern(ROLE_REGEX_FULLNAME).message(ROLE_ERRORS_FULLNAME),
     displayName: Joi.string(),
     avatar : Joi.string().default(null),
@@ -33,7 +31,6 @@ import {   ROLE_MESSAGES,
     createdAt: Joi.date().default(Date.now), 
     updatedAt: Joi.date().default(Date.now),
     _destroy: Joi.boolean().default(false)
-
  })
 
  const INVALID_UPDATE_FIELDS = ['_id', 'email', 'role', 'createdAt'];
@@ -97,7 +94,7 @@ const updateProfile = async (userId, updateData) => {
         }
         const result = await GET_DB().collection(USER_COLLECTION_NAME).findOneAndUpdate(
             { _id: new ObjectId(userId) },
-            { $set: updateData },
+            { $set: {...updateData , updatedAt: Date.now()} },
             { returnDocument: 'after' }
         );
         return result;

@@ -5,17 +5,18 @@ import { BOARD_TYPE } from '~/utils/constants.js';
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
 const createNew = async (req, res, next) => {
-  const correctBoard = Joi.object({
+  const correctCard = Joi.object({
     title: Joi.string().min(3).max(30).required().trim().strict(),
     description: Joi.string().max(300).trim().strict(),
     type: Joi.string().valid(BOARD_TYPE.PRIVATE, BOARD_TYPE.PUBLIC),
     boardId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
     columnId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+
   });
   try {
     console.log("req.body:", req.body);
-    console.log("correctBoard:", req.body);
-    await correctBoard.validateAsync(req.body, { abortEarly: false });
+    console.log("correctCard:", req.body);
+    await correctCard.validateAsync(req.body, { abortEarly: false });
     next()
 
   } catch (error) {
@@ -25,12 +26,12 @@ const createNew = async (req, res, next) => {
   }
 }
 const deleteCard = async (req, res, next) => {
-  const correctBoard = Joi.object({
+  const correctCard = Joi.object({
     id: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
   });
   try {
     console.log("req.params:", req.params);
-    await correctBoard.validateAsync(req.params, { abortEarly: false });
+    await correctCard.validateAsync(req.params, { abortEarly: false });
     next()
   } catch (error) {
     const newMessage = new Error(error).message;
@@ -39,16 +40,20 @@ const deleteCard = async (req, res, next) => {
   }
 }
 const updateCard = async (req, res, next) => {
-  const correctBoard = Joi.object({ 
-    id: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
-    title: Joi.string().min(3).max(30).trim().strict(),
-    description: Joi.string().max(300).trim().strict(),
+  const correctCard = Joi.object({ 
+    title: Joi.string().min(3).max(30).trim(),
+    description: Joi.string().max(300).trim(),
     type: Joi.string().valid(BOARD_TYPE.PRIVATE, BOARD_TYPE.PUBLIC),
+    cover: Joi.string().uri()
   });
+  const options = {
+  abortEarly: false,     // Để báo tất cả lỗi thay vì lỗi đầu tiên
+  stripUnknown: true     // QUAN TRỌNG: Loại bỏ tất cả các trường không có trong schema
+};
   try {
     console.log("req.params:", req.params);
     console.log("req.body:", req.body);
-    await correctBoard.validateAsync({ ...req.params, ...req.body }, { abortEarly: false });
+    await correctCard.validateAsync({ ...req.params, ...req.body }, options);
     next()
   }
     catch (error) {

@@ -10,8 +10,7 @@ const createNew = async (req, res,next)=>{
        type:Joi.string().valid(BOARD_TYPE.PRIVATE,BOARD_TYPE.PUBLIC).required()
      });
      try {
-        console.log("req.body:", req.body);
-        console.log("correctBoard:", req.body);
+     
         await correctBoard.validateAsync(req.body , { abortEarly: false }  );
         next()
       

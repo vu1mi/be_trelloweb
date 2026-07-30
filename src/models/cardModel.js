@@ -11,16 +11,34 @@ const CARD_COLLECTION_SCHEMA = Joi.object({
   boardId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
   columnId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
   title: Joi.string().required().min(3).max(50).trim().strict(),
-  description: Joi.string().optional(),
+  description: Joi.string().optional().trim(),
   type: Joi.string().valid(BOARD_TYPE.PRIVATE, BOARD_TYPE.PUBLIC),
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false)
 })
+const CARD_COLLECTION_SCHEMA_UPDATE = Joi.object({
+  title: Joi.string().min(3).max(50),
+  description: Joi.string().optional().trim(),
+  type: Joi.string().valid(BOARD_TYPE.PRIVATE, BOARD_TYPE.PUBLIC),
+  cover: Joi.string().uri()
+})
+
 
 const validateData = async (data) => {
   try {
     const validData = await CARD_COLLECTION_SCHEMA.validateAsync(data, {
+      abortEarly: false
+    })
+    return validData
+  } catch (error) {
+    console.error("❌ CardModel.validateData error:", error)
+    throw error
+  }
+}
+const validateDataUpdate = async (data) => {
+  try {
+    const validData = await CARD_COLLECTION_SCHEMA_UPDATE.validateAsync(data, {
       abortEarly: false
     })
     return validData
@@ -87,11 +105,11 @@ const deleteCard = async (cardId) => {
     }
 }
  const updateCard = async (cardId, updateData) => {
-  //  const validData = await validateData(updateData)
+   const validData = await validateDataUpdate(updateData)
     try {
         const result = await GET_DB().collection(CARD_COLLECTION_NAME).findOneAndUpdate(
             { _id: new ObjectId(cardId) },
-            { $set: updateData },
+            { $set:  { ...validData, updatedAt: Date.now() } },
             { returnDocument: 'after' }
         );
         return result;
