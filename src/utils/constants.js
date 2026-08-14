@@ -8,14 +8,18 @@ export const BOARD_TYPE = {
   PUBLIC: 'public'
 }
 
-export const  PAGE_DEFAULT_LIMIT = 10;
-export const  PAGE_DEFAULT_PAGE = 1;
+export const PAGE_DEFAULT_LIMIT = 10;
+export const PAGE_DEFAULT_PAGE = 1;
 
 export const INVITATION_TYPE = {
   BOARD_INVITATION: 'BOARD_INVITATION'
 }
 export const BOARD_INVITATION_STATUS = {
-  PENDING:'PENDING',
-  ACCEPTED:'ACCEPTED',
-  REJECTED:'REJECTED'
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED'
+}
+export const CARD_MEMBER_ACTION = {
+  ADD: 'ADD',
+  REMOVE: 'REMOVE'
 }

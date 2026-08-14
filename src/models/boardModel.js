@@ -210,7 +210,7 @@ const pullColumnFromBoard = async (column) => {
     throw error;
   }
 }
-const getAllBoards = async (userId, page, pageSize) => {
+const getAllBoards = async (userId, page, pageSize , querysearch) => {
 
   const condition = [
     { _destroy: false },
@@ -221,6 +221,14 @@ const getAllBoards = async (userId, page, pageSize) => {
       ]
     }
   ]
+
+  if (querysearch) {
+    Object.keys(querysearch).forEach(key => {
+        condition.push({ [key]: { $regex: querysearch[key], $options: 'i' } });
+      });
+  }
+
+  console.log(querysearch, "querysearch", condition, "condition");
   try {
     const skip = (page - 1) * pageSize;
     const boards = await GET_DB()

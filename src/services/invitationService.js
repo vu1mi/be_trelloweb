@@ -25,8 +25,8 @@ const createNew = async (data, userId) => {
 
         }
         const allIds = [...(board.adminIds || []), ...(board.memberIds || [])].map(id => id.toString());
-        const exists = allIds.includes(userId);
-        console.log(userId, allIds, exists)
+        const exists = allIds.includes(inviteed._id.toString());
+        console.log(inviteed._id, allIds, exists)
 
         if (exists) {
             throw new Error('Its already on the board')

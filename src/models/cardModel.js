@@ -2,7 +2,7 @@ import Joi from 'joi'
 import { find } from 'lodash'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 import ApiError from '~/utils/ApiError.js';
-import { BOARD_TYPE } from '~/utils/constants.js';
+import { BOARD_TYPE, CARD_MEMBER_ACTION } from '~/utils/constants.js';
 import { GET_DB } from '~/config/mongodb'
 import { ObjectId } from 'mongodb'
 // Define Collection (name & schema)
@@ -21,7 +21,11 @@ const CARD_COLLECTION_SCHEMA_UPDATE = Joi.object({
   title: Joi.string().min(3).max(50),
   description: Joi.string().optional().trim(),
   type: Joi.string().valid(BOARD_TYPE.PRIVATE, BOARD_TYPE.PUBLIC),
-  cover: Joi.string().uri()
+  cover: Joi.string().uri(),
+  updateMemberCard: Joi.object({
+    userId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+    action: Joi.string().required().valid(CARD_MEMBER_ACTION.ADD, CARD_MEMBER_ACTION.REMOVE),
+  }).optional()
 })
 
 
@@ -83,40 +87,63 @@ const findOne = async (id) => {
   }
 }
 const deleteCard = async (cardId) => {
-    try {
-       const result = await GET_DB()
-            .collection(CARD_COLLECTION_NAME)
-            .deleteOne({ _id: new ObjectId(cardId) });
-        return result;
-    } catch (error) {
-        console.error("❌ CardModel.deleteCard error:", error);
-        throw error;
-    }
+  try {
+    const result = await GET_DB()
+      .collection(CARD_COLLECTION_NAME)
+      .deleteOne({ _id: new ObjectId(cardId) });
+    return result;
+  } catch (error) {
+    console.error("❌ CardModel.deleteCard error:", error);
+    throw error;
+  }
 }
- const pullAllCardsFromColumn = async (column) => {
-    try {
-        const result = await GET_DB()
-            .collection(CARD_COLLECTION_NAME)
-            .deleteMany({ columnId: new ObjectId(column._id) });
-        return result;
-    } catch (error) {
-        console.error("❌ CardModel.pullAllCardsFromColumn error:", error);
-        throw error;
-    }
+const pullAllCardsFromColumn = async (column) => {
+  try {
+    const result = await GET_DB()
+      .collection(CARD_COLLECTION_NAME)
+      .deleteMany({ columnId: new ObjectId(column._id) });
+    return result;
+  } catch (error) {
+    console.error("❌ CardModel.pullAllCardsFromColumn error:", error);
+    throw error;
+  }
 }
- const updateCard = async (cardId, updateData) => {
-   const validData = await validateDataUpdate(updateData)
-    try {
-        const result = await GET_DB().collection(CARD_COLLECTION_NAME).findOneAndUpdate(
-            { _id: new ObjectId(cardId) },
-            { $set:  { ...validData, updatedAt: Date.now() } },
-            { returnDocument: 'after' }
-        );
-        return result;
-    } catch (error) {
-        console.error("❌ CardModel.updateCard error:", error);
-        throw error;
+const updateCard = async (cardId, updateData) => {
+  const validData = await validateDataUpdate(updateData)
+  try {
+    const result = await GET_DB().collection(CARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(cardId) },
+      { $set: { ...validData, updatedAt: Date.now() } },
+      { returnDocument: 'after' }
+    );
+    return result;
+  } catch (error) {
+    console.error("❌ CardModel.updateCard error:", error);
+    throw error;
+  }
+}
+
+const updateMemberCard = async (cardId, updateMemberCard) => {
+  try {
+
+    let actionUpdate = {}
+    if (updateMemberCard.action === CARD_MEMBER_ACTION.ADD) {
+      actionUpdate = { $push: { membersIds: new ObjectId(updateMemberCard.userId) } };
+    } else if (updateMemberCard.action === CARD_MEMBER_ACTION.REMOVE) {
+      actionUpdate = { $pull: { membersIds: new ObjectId(updateMemberCard.userId) } };
     }
+
+    const result = await GET_DB().collection(CARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(cardId) },
+      actionUpdate,
+      { returnDocument: 'after' }
+    );
+    return result;
+  }
+  catch (error) {
+    console.error("❌ CardModel.updateMemberCard error:", error);
+    throw error;
+  }
 }
 
 export const CardModel = {
@@ -126,5 +153,6 @@ export const CardModel = {
   findOne,
   deleteCard,
   updateCard,
-  pullAllCardsFromColumn
+  pullAllCardsFromColumn,
+  updateMemberCard
 }
