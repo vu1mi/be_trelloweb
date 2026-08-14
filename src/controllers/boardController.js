@@ -40,9 +40,12 @@ const updateBoard = async (req, res, next) => {
 const getAllBoards = async (req, res, next) => {
     try {
         const userId = req.jwtDecode._id; // Assuming the user ID is available in req.jwtDecode
-        const {page , pageSize} = req.query;
+        const {page , pageSize , q} = req.query;
+        console.log("Received query parameters:", { page, pageSize, q });
+        const querysearch = q
+        console.log("Fetching boards with title:", querysearch);
         console.log("Fetching all boards for userId:", userId);
-        const boards = await boardService.getAllBoards(userId , page , pageSize);
+        const boards = await boardService.getAllBoards(userId , page , pageSize , querysearch);
         res.status(StatusCodes.OK).json(boards);
     } catch (error) {
         console.error("Error fetching boards:", error);

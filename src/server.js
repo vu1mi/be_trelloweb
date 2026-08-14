@@ -7,6 +7,7 @@ import { handlerError } from '~/middlewares/handlerErrorMiddleware.js'
 import cors from 'cors'
 import { corsOptions } from '~/config/cors.js'
 import cookieParser from 'cookie-parser'
+import { initInvitationToBoardSocket } from '~/sockets/invitationToBoardSocket.js'
 
 
 
@@ -46,11 +47,7 @@ const START_SERVER = async () => {
 
   io.on('connection', (socket) => {
     console.log('🔌 Socket connected:', socket.id)
-
-    socket.on('FE_USER_INVITED_TO_BOARD', (invitation) => {
-      console.log('📩 Received invitation:', invitation)
-      socket.broadcast.emit('BE_USER_INVITED_TO_BOARD', invitation)
-    })
+    initInvitationToBoardSocket(socket)
 
     socket.on('disconnect', () => {
       console.log('❌ Socket disconnected:', socket.id)
