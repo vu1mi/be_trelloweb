@@ -8,6 +8,9 @@ import {env} from '~/config/environment.js';
 import {BrevoProvider} from '~/providers/BrevoProvider.js';
 import {jwtProvider} from '~/providers/JwtProvider.js';
 import {CloudinaryProvider} from '~/providers/CloudinaryProvider.js';
+import crypto from 'crypto';
+import { clientRedis } from '~/config/redis.js';
+
 const createNew = async (userData) => {
     //kiem tra xem email da ton tai tren he thong hay chua
     try{
@@ -86,6 +89,7 @@ const login = async (loginData) => {
 }
 const verifyEmail = async (reqbody) => {
     try {
+        console.log("Updating user with data:");
         const user = await userModel.findOneByEmail(reqbody.email);
         if (!user) {
             throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
@@ -175,11 +179,77 @@ const getProfile = async (userId) => {
     }
 }
 
+const forgotPassword = async (email) => {
+    try {
+        const user = await userModel.findOneByEmail(email);
+        if (!user) {
+            throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
+        }
+        const otp = crypto.randomInt(100000, 1000000).toString();
+          const customText = `Hi ${user.username},\n
+                            \nThis is your password reset code:\n
+                            \n${otp}\n
+                            \nIf you did not request a password reset, please ignore this email.\n
+                            \nBest regards,
+                            \nYour Team`;
+        const customSubject = 'Password Reset Request';
+        await clientRedis.set(`forgotPassword:${email}`, otp, { EX: 300 }); // 5 minutes expiration
+
+        await BrevoProvider.sendEmail(user.email, customSubject, customText);
+        console.log('Password reset email sent successfully');
+        return { message: "Password reset email sent successfully" , otp: otp}; // Return the OTP for testing purposes
+    } catch (error) {
+        console.error("❌ userService.forgotPassword error:", error);
+        throw error;
+    }
+}
+
+const checkOtp = async (email, otp) => {
+    try {
+        const user = await userModel.findOneByEmail(email);
+        if (!user) {
+            throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
+        }
+        const storedOtp = await clientRedis.get(`forgotPassword:${email}`);
+        if (!storedOtp) {
+            throw new ApiError(StatusCodes.BAD_REQUEST, "OTP has expired or is invalid");
+        }
+        if (storedOtp !== otp) {
+            throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid OTP");
+        }
+        await clientRedis.del(`forgotPassword:${email}`);
+        console.log('checkotp success');
+        return { message: "OTP verified successfully" };
+    }
+    catch (error) {
+        console.error("❌ userService.checkOtp error:", error);
+        throw error;
+    } 
+}
+const resetPassword = async (email, newPassword) => {
+    try {
+        const user = await userModel.findOneByEmail(email);
+        if (!user) {
+            throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
+        }
+        const hashedPassword = await bcrypt.hashSync(newPassword, 12);
+        await userModel.update(user._id, { password: hashedPassword });
+        return { message: "Password reset successfully" };
+    }
+    catch (error) {
+        console.error("❌ userService.resetPassword error:", error);
+        throw error;
+    }
+}
+
 export const userService = {
     createNew,
     login,
     verifyEmail,
     refreshToken,
     updateProfile,
-    getProfile
+    getProfile,
+    forgotPassword,
+    checkOtp,
+    resetPassword
 }
