@@ -8,6 +8,7 @@ import cors from 'cors'
 import { corsOptions } from '~/config/cors.js'
 import cookieParser from 'cookie-parser'
 import { initInvitationToBoardSocket } from '~/sockets/invitationToBoardSocket.js'
+import { clientRedis } from '~/config/redis.js'
 
 
 
@@ -29,11 +30,7 @@ const START_SERVER = async () => {
 
   app.use(cookieParser())
   app.use('/v1', API_V1_ROUTES)
-
-
-
   console.log(await GET_DB().listCollections().toArray())
-
   app.use(handlerError)
   const server = createServer(app);
   const io = new Server(server, {
@@ -53,7 +50,8 @@ const START_SERVER = async () => {
       console.log('❌ Socket disconnected:', socket.id)
     })
   })
-
+  await clientRedis.connect();
+  console.log('Connected to Redis successfully', await clientRedis.ping());
   server.listen(env.APP_PORT, () => {
     console.log(`🚀 Server running at http://localhost:${env.APP_PORT}`)
   })

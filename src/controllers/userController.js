@@ -91,6 +91,36 @@ const getProfile = async (req, res, next) => {
     }
 }
 
+const forgotPassword = async (req, res, next) => {
+    try {
+        const email = req.body.email;
+        const result = await userService.forgotPassword(email);
+        res.status(StatusCodes.OK).json({ message: 'Password reset email sent successfully', otp: result.otp }); // Return the OTP for testing purposes
+    } catch (error) {
+        next(error);
+    }
+}
+
+const checkOtp = async (req, res, next) => {
+    try {
+        const { email, otp } = req.body;
+        const result = await userService.checkOtp(email, otp);
+        res.status(StatusCodes.OK).json({ message: 'OTP verified successfully', result });
+    }
+    catch (error) {
+        next(error);
+    }
+}
+const resetPassword = async (req, res, next) => {
+    try {
+        const { email, newPassword } = req.body;
+        const result = await userService.resetPassword(email, newPassword);
+        res.status(StatusCodes.OK).json({ message: 'Password reset successfully', result });
+    }
+    catch (error) {
+        next(error);
+    }
+}
 export const userController = {
     createNew,
     login,
@@ -98,5 +128,8 @@ export const userController = {
     updateProfile,
     getProfile,
     logout,
-    refreshToken
+    refreshToken,
+    forgotPassword,
+    checkOtp,
+    resetPassword
 }

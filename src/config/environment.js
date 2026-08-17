@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { REDISEARCH_LANGUAGE } from 'redis';
 
 export const env ={
     MONGODB_URI: process.env.MONGODB_URI ,
@@ -18,4 +19,6 @@ export const env ={
     API_KEY_CLOUDINARY: process.env.API_KEY_CLOUDINARY,
     API_SECRET_CLOUDINARY: process.env.API_SECRET_CLOUDINARY,
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+    REDIS_URL: process.env.REDIS_URL,
+    PASSWORD_REDIS: process.env.PASSWORD_REDIS,
 }

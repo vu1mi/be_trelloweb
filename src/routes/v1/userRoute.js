@@ -23,4 +23,10 @@ const Router = express.Router();
         .get(userController.getProfile)
         .patch(authMiddleware.isAuth, multeruploadMiddleware.upload.single('avatar'), userValidation.updateProfile, userController.updateProfile);
 
+    Router.route('/forgot-password')
+        .post(userValidation.forgotPassword, userController.forgotPassword);
+    Router.route('/reset-password')
+        .put(userValidation.resetPassword, userController.resetPassword);
+    Router.route('/check_otp')
+        .post(userValidation.checkOtp, userController.checkOtp);
 export const userRoute = Router;
