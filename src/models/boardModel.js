@@ -255,6 +255,22 @@ const getAllBoards = async (userId, page, pageSize , querysearch) => {
   }
 }
 
+const update = async (boardId, updateData) => {
+  const validData = await Joi.object({
+    columnOrderIds: Joi.array().items(
+      Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+    ).required(),
+  }).validateAsync(updateData, { abortEarly: false });
+
+  validData.columnOrderIds = validData.columnOrderIds.map((id) => new ObjectId(id));
+  const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+    { _id: new ObjectId(boardId) },
+    { $set: { columnOrderIds: validData.columnOrderIds, updatedAt: new Date() } },
+    { returnDocument: 'after', includeResultMetadata: false }
+  );
+  return result?.value ?? result ?? null;
+}
+
 export const BoardModel = {
   COLUMN_COLLECTION_NAME,
   CARD_COLLECTION_NAME,
@@ -265,5 +281,6 @@ export const BoardModel = {
   pushColumnToBoard,
   pullColumnFromBoard,
   getAllBoards,
-  pushToMemberBoard
+  pushToMemberBoard,
+  update
 }

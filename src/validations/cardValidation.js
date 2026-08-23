@@ -46,6 +46,7 @@ const updateCard = async (req, res, next) => {
     description: Joi.string().max(300).trim(),
     type: Joi.string().valid(BOARD_TYPE.PRIVATE, BOARD_TYPE.PUBLIC),
     cover: Joi.string().uri(),
+    columnId: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
     updateMemberCard: Joi.object({
       userId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
       action: Joi.string().required().valid(CARD_MEMBER_ACTION.ADD, CARD_MEMBER_ACTION.REMOVE),

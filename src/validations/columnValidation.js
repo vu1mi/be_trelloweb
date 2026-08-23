@@ -25,9 +25,14 @@ const createNew = async (req, res,next)=>{
 }
 const update = async (req, res,next)=>{
   const correctBoard = Joi.object({
-    title: Joi.string().min(3).max(30).required().trim().strict(),
-  });
+    title: Joi.string().min(3).max(30).trim().strict(),
+    description: Joi.string().max(300).trim().strict(),
+    cardOrderIds: Joi.array().items(
+      Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+    ),
+  }).min(1);
   try {
+    console.log("req.id:", req.params.id);
      console.log("req.body:", req.body);
      console.log("correctBoard:", req.body);
      await correctBoard.validateAsync(req.body , { abortEarly: false }  );

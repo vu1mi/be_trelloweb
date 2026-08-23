@@ -22,6 +22,9 @@ const COLUMN_COLLECTION_SCHEMA = Joi.object({
 const COLUMN_COLLECTION_UPDATE_SCHEMA = Joi.object({
   title: Joi.string().min(3).max(50).trim().strict(),
   description: Joi.string().max(300).trim().strict(),
+  cardOrderIds: Joi.array().items(
+    Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+  ),
   updatedAt: Joi.date().timestamp('javascript').default(Date.now),
 })
 
@@ -136,6 +139,9 @@ const deleteColumn = async (columnId) => {
 const update = async (columnId, updateData, userId) => {
     try {
       const validData = await validateUpdateData(updateData)
+        if (validData.cardOrderIds) {
+          validData.cardOrderIds = validData.cardOrderIds.map((id) => new ObjectId(id));
+        }
         const result = await GET_DB()
             .collection(COLUMN_COLLECTION_NAME)
             .findOneAndUpdate(

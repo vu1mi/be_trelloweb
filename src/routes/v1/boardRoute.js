@@ -11,7 +11,7 @@ Router.route('/')
 
 Router.route('/:id')
     .get( boardController.getBoardById )
-    // .put( authMiddleware.isAuth, boardValidation.update, boardController.updateBoard );
+    .patch( authMiddleware.isAuth, boardValidation.updateOrder, boardController.updateBoard );
 
 
 export const boardRoute = Router 
