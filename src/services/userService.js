@@ -50,17 +50,38 @@ const createNew = async (userData) => {
 }
 const login = async (loginData) => {
     try {
+        const failedLoginKey = loginData.email;
+        const blockLoginKey = `block:${loginData.email}`;
+
+        if (await clientRedis.exists(blockLoginKey)) {
+            throw new ApiError(StatusCodes.TOO_MANY_REQUESTS, "This email is temporarily blocked. Please try again later");
+        }
+
         const user = await userModel.findOneByEmail(loginData.email);
         if (!user) {
             throw new ApiError(StatusCodes.NOT_ACCEPTABLE, "Invalid email or password");
         }
         const isPasswordValid =  bcrypt.compareSync(loginData.password, user.password);
         if (!isPasswordValid) {
+            const failedLoginCount = await clientRedis.incr(failedLoginKey);
+
+            if (failedLoginCount === 1) {
+                await clientRedis.expire(failedLoginKey, 120);
+            }
+
+            if (failedLoginCount >= 5) {
+                await clientRedis.del(failedLoginKey);
+                await clientRedis.set(blockLoginKey, '1', { EX: 120 });
+                throw new ApiError(StatusCodes.TOO_MANY_REQUESTS, "This email is temporarily blocked. Please try again later");
+            }
+
             throw new ApiError(StatusCodes.NOT_ACCEPTABLE, "Invalid email or password");
         }
         if (!user.isActive) {
             throw new ApiError(StatusCodes.FORBIDDEN, "Email not verified");
         } 
+
+        await clientRedis.del(failedLoginKey);
 
         const userInfo = { 
             _id: user._id,
