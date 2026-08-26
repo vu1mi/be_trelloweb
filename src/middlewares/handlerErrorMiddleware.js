@@ -18,5 +18,8 @@ export const handlerError = (err, req, res, next) => {
   // ...
   // console.error(responseError)
   // Trả responseError về phía Front-end
+  if(env.BUILD_ENV !== 'dev') {
+    delete responseError.stack // Ẩn stack trace khi ở môi trường production
+  }
   res.status(responseError.statusCode).json(responseError)
 }
