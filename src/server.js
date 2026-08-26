@@ -52,9 +52,15 @@ const START_SERVER = async () => {
   })
   await clientRedis.connect();
   console.log('Connected to Redis successfully', await clientRedis.ping());
-  server.listen(env.APP_PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${env.APP_PORT}`)
-  })
+  if(env.BUILD_MODE === 'production') {
+    server.listen(process.env.PORT, () => {
+      console.log(`🚀 Server running at http://localhost:${process.env.PORT || env.APP_PORT}`)
+    })
+  }else {
+    server.listen(env.APP_PORT, env.APP_HOST ,() => {
+      console.log(`🚀 Server running at http://localhost:${env.APP_PORT}`)
+    })
+  }
   exitHook(signal => {
     console.log(`Received ${signal}. Closing server...`)
     CLOSE_DB()
