@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes'
-// import { env } from '~/config/environment'
+import { env } from '~/config/environment'
 import ApiError from '~/utils/ApiError.js'
 
 export const handlerError = (err, req, res, next) => {
