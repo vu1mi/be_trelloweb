@@ -1,7 +1,9 @@
 export const WHITELIST_DOMAINS = [
   // 'http://localhost:3000',
   // 'http://localhost:5173'
-    'https://trello-web-vu1mis.vercel.app'
+    'https://trello-web-vu1mis.vercel.app',
+    'https://trello-web-git-main-vu1mis.vercel.app',
+
 ]
 
 export const BOARD_TYPE = {
